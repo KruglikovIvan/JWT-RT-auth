@@ -1,4 +1,32 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const { promisify } = require('util');
+
+// Create the Express app
+const app = express();
+
+// Use CORS and body parser middleware
+app.use(cors());
+app.use(bodyParser.json());
+
+// Get the private and public keys from environment variables
+const privateKey = process.env.JWT_PRIVATE_KEY;
+const publicKey = process.env.JWT_PUBLIC_KEY;
+
+// Function to create a token for a given user
+function createToken(sub) {
+    const now = Math.floor(Date.now() / 1000);
+    const expiresIn = 3600;
+    const payload = {
+        sub,
+        iat: now,
+        exp: now + expiresIn,
+    };
+    // Return a promise to sign the payload with the private key and the RS256 algorithm
+    return promisify(jwt.sign)(payload, privateKey, { algorithm: 'RS256' });
+}
 
 // Function to validate a token
 function validateToken(token) {
